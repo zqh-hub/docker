@@ -1,4 +1,4 @@
-#### Docker
+#### Docker入门
 
 ##### Docker基本组成
 
@@ -262,6 +262,12 @@ root                8021                8002                0                   
 [root@localhost /]# 
 ```
 
+###### 查看内存信息
+
+```shell
+docker stats
+```
+
 ###### 查看镜像元数据
 
 ```shell
@@ -311,5 +317,34 @@ test.py
 ###### 练习：安装tomcat
 
 ```shell
+[root@localhost ~]# docker pull tomcat
+[root@localhost ~]# docker run -d -p 3345:8080 --name tomcat_01 tomcat
+[root@localhost ~]# docker exec -it c7ca25dcf7ae /bin/bash
+root@c7ca25dcf7ae:/usr/local/tomcat# cp -r webapps.dist/* webapps/
+```
+
+练习：安装ES
+
+```shell
+docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -e ES_JAVA_OPTS="-Xms64m -Xmx512m" elasticsearch:7.6.2
+```
+
+##### commit镜像
+
+```shell
+docker commit -m="描述信息" -a="作者" 容器id 目标镜像名:[Tag]
+
+[root@localhost ~]# docker run -it tomcat    启动tomcat,发现webapps下没有项目
+# 现在咱们就将源tomcat进行修改，让webapps下有项目，然后再进行镜像打包
+[root@localhost ~]# docker exec -it 959fac3a6e08 /bin/bash      新终端进入tomcat
+root@959fac3a6e08:/usr/local/tomcat# cp -r webapps.dist/* webapps    拷贝项目到webapps下，这就是新增的层
+[root@localhost ~]# docker commit -m="new tomcat" -a="coco" 959fac3a6e08 tomcatc  # 新的镜像
+sha256:43c1d60400e8807c4babbb3760ea5672f702e40244ca83e88f3f9ea45d678507
+[root@localhost ~]# docker images
+REPOSITORY      TAG       IMAGE ID       CREATED         SIZE
+tomcatc         latest    43c1d60400e8   6 seconds ago   673MB   # 自己做的镜像，以后用它就可以了
+tomcat          latest    46cfbf1293b1   13 days ago     668MB
+
+docker run -d -p 3345:8080 --name tomcat_m 43c1d60400e8  # 直接启动新生成的
 ```
 
