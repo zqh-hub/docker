@@ -170,3 +170,186 @@ docker run -d -p 9090:8080 --name tomcatmi_01 -v /root/docker/build/tomcat/objec
 http://122.51.127.167:9090/
 ```
 
+#### 发布镜像
+
+##### 发布到Docker Hub
+
+1、注册DockerHub
+
+```shell
+youmikuang
+going163@163.com
+zqh139499
+```
+
+2、命令行登陆docker hub账号
+
+```shell
+docker login -u youmikuang
+```
+
+3、提交
+
+```shell
+docker push tomcatmi
+# 指定版本号的方式
+1、docker tag 容器ID youmikuang/tomcatmi:1.0 # 这样，镜像就会多出一个youmikuang/tomcatmi
+2、docker push youmikuang/tomcatmi:1.0
+```
+
+![013](/Users/coco/Documents/docker/img/013.png)
+
+##### 发布到腾讯云镜像
+
+1、创建命名空间
+
+![014](/Users/coco/Documents/docker/img/014.png)
+
+2、创建仓库
+
+<img src="/Users/coco/Documents/docker/img/015.png" alt="015" style="zoom:33%;" />
+
+![016](/Users/coco/Documents/docker/img/016.png)
+
+#### Docker网络
+
+![017](/Users/coco/Documents/docker/img/017.png)
+
+##### 网络介绍
+
+![018](/Users/coco/Documents/docker/img/018.png)
+
+###### 尝试linux服务器ping容器ip
+
+1、获取容器的ip
+
+![019](/Users/coco/Documents/docker/img/019.png)
+
+![](/Users/coco/Documents/docker/img/021.png)
+
+```
+每启动一个容器，就会产生一对ip，这实现了linux服务器与容器的联通，利用的是evth-pair技术
+```
+
+2、ping
+
+![020](/Users/coco/Documents/docker/img/020.png)
+
+###### 尝试容器与容器ping
+
+![022](/Users/coco/Documents/docker/img/022.png)
+
+###### 原理图
+
+![](/Users/coco/Documents/docker/img/023.png)
+
+![](/Users/coco/Documents/docker/img/024.png)
+
+##### --link实现通过名称ping（过时）
+
+```
+弊端：现在是tomcat_02 与tomcat_01实现link，02ping01没问题，但是01ping02不一定成功
+```
+
+![025](/Users/coco/Documents/docker/img/025.png)
+
+```shell
+使用link能够实现ping 的原理：
+	当tomcat_02执行命令后，会在其的host文件里写入tomcat_01的ip,所以tomcat_02 ping tomcat_01是可以的
+```
+
+![](/Users/coco/Documents/docker/img/026.png)
+
+##### 自定义网络
+
+###### 查看所有的网络
+
+```shellshe l
+网络模式
+	bridge	桥接模式（推荐）
+	none	不配置网络
+	host		与宿主机共享模式
+	container		容器网络连通
+Name：
+	bridge		它就是docker0
+```
+
+![](/Users/coco/Documents/docker/img/027.png)
+
+###### 默认--net命令
+
+```shell
+# 在启动一个容器时，虽然之前的没有制定网络，但实际默认是有的
+docker run -d -p 9090:8080 --name tomcat_01 tomcat
+等价于：
+docker run -d -p 9090:8080 --name tomcat_01 --net bridge tomcat # bridge即使docker0
+```
+
+###### 创建网络
+
+```shell
+docker network create --driver bridge --subnet 192.168.0.0/16 --gateway 192.168.0.1 mynet
+
+--drive：指定网络模式
+--subnet：子网
+--gateway：网关
+```
+
+![028](/Users/coco/Documents/docker/img/028.png)
+
+![029](/Users/coco/Documents/docker/img/029.png)
+
+###### 查看网络
+
+```shell
+docker network inspect 网络名
+```
+
+![030](/Users/coco/Documents/docker/img/030.png)
+
+###### 指定自定义的网络
+
+```shell
+1、指定网络，运行两个容器
+```
+
+![031](/Users/coco/Documents/docker/img/031.png)
+
+```shellshe l
+2、容器运行后，查看网络的变化：新增IP
+```
+
+![032](/Users/coco/Documents/docker/img/032.png)
+
+```shell
+3、容器之间使用容器名进行ping
+```
+
+![](/Users/coco/Documents/docker/img/033.png)
+
+###### 使用自定义网络的好处
+
+```shellshe l
+保证不同集群之间的安全
+```
+
+##### 网络之间的联通
+
+![034](/Users/coco/Documents/docker/img/034.png)
+
+###### network connect命令
+
+```shell
+docker network connect 网络名 容器名
+```
+
+![035](/Users/coco/Documents/docker/img/035.png)
+
+```shell
+连通之后，网络mynet新增容器ip
+# 其实就是将容器tomcat_bridge_01容器有两个IP：docker inspect 容器id
+```
+
+![036](/Users/coco/Documents/docker/img/036.png)
+
+![037](/Users/coco/Documents/docker/img/037.png)
