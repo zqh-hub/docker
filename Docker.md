@@ -2,7 +2,7 @@
 
 ##### Docker基本组成
 
-![001](/Users/eric/Documents/data/docker/img/001.jpeg)
+![001](/Users/coco/Documents/docker/img/001.jpeg)
 
 ##### Docker安装
 
@@ -29,6 +29,15 @@ yum install docker-ce docker-ce-cli containerd.io
 6、启动
 systemctl start docker
 # Job for docker.service failed because the control process exited with error code. See "systemctl status docker.service" and "journalctl -xe" for details. -----> 关闭防火墙
+
+7、修改为国内镜像地址
+# vim /etc/docker/daemon.json
+{
+   "registry-mirrors": [
+       "https://mirror.ccs.tencentyun.com"
+  ]
+}
+
 7、查看是否成功
 docker version
 8、运行hello world
@@ -40,7 +49,7 @@ docker images
 
 ##### hello-world运行流程
 
-![002](/Users/eric/Documents/data/docker/img/002.png)
+![002](/Users/coco/Documents/docker/img/002.png)
 
 ##### 底层原理
 
@@ -51,16 +60,16 @@ Docker是一个Client-Server结构的系统，Docker的守护进程运行在主�
 DockerServer接收到Docker-Client的指令，就会执行命令
 ```
 
-![003](/Users/eric/Documents/data/docker/img/003.png)
+![003](/Users/coco/Documents/docker/img/003.png)
 
 ###### Docker为什么比VM快
 
-![004](/Users/eric/Documents/data/docker/img/004.jpeg)
+![004](/Users/coco/Documents/docker/img/004.jpeg)
 
 ```
 1、Docker有着比VM更少的抽象层
 2、Docker利用的是宿主机的内核，VM需要是Guest OS
-所以说，新建一个容器的时候，Docker不需要想虚拟机一样重新加载一个操作系统内核，避免引导。虚拟机是加载Guest OS,分钟级别，而Docker是利用宿主机的操作系统，省略了这个负载的过程
+所以说，新建一个容器的时候，Docker不需要像虚拟机一样重新加载一个操作系统内核，避免引导。虚拟机是加载Guest OS,分钟级别，而Docker是利用宿主机的操作系统，省略了这个负载的过程
 ```
 
 ##### Docker常用命令
@@ -144,7 +153,7 @@ docker.io/library/mysql:latest # 真实地址
 ###### 容器命令
 
 ```shell
-1、下载容器
+1、下载镜像
 docker pull centos
 2、启动容器
 docker run [可选参数] image
@@ -257,9 +266,8 @@ top
 CONTAINER ID   IMAGE     COMMAND       CREATED         STATUS         PORTS     NAMES
 e16f7c6ee9e1   centos    "/bin/bash"   8 minutes ago   Up 8 minutes             blissful_bohr
 [root@localhost /]# docker top e16f7c6ee9e1
-UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
-root                8021                8002                0                   21:46               pts/0               00:00:00            /bin/bash
-[root@localhost /]# 
+UID        PID        PPID          C         STIME         TTY          TIME          CMD
+root       8021       8002          0         21:46        pts/0      00:00:00     /bin/bash
 ```
 
 ###### 查看内存信息
@@ -312,7 +320,7 @@ test.py
 此时就可在浏览器访问"http://111.67.204.86:3344/"了
 ```
 
-![004](/Users/eric/Documents/data/docker/img/004.png)
+![004](/Users/coco/Documents/docker/img/004.png)
 
 ###### 练习：安装tomcat
 
@@ -327,6 +335,8 @@ root@c7ca25dcf7ae:/usr/local/tomcat# cp -r webapps.dist/* webapps/
 
 ```shell
 docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -e ES_JAVA_OPTS="-Xms64m -Xmx512m" elasticsearch:7.6.2
+
+-e：设置环境变量
 ```
 
 ##### commit镜像
